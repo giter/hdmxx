@@ -3,6 +3,7 @@ package models;
 
 import (
 	
+	"fmt"
 	"time"
 	"io/ioutil"
 	"net/http"
@@ -79,14 +80,16 @@ func DoSiteCheck() {
 
 		now := time.Now().Unix()
 
+
 		if s.Disabled || s.CheckPoint == "" || s.Duration <= 0 || s.Expiration > now {
+
 			continue
 		}
 
 
 		s.Expiration = (now+int64(s.Duration))
 
-		go (func () {
+		go (func (s Site) {
 
 			u := s.CheckPoint
 			m := s.Method
@@ -95,6 +98,8 @@ func DoSiteCheck() {
 			var err error
 			
 			s.Status = 1
+
+			fmt.Println("Processing " + u + "...")
 
 			if m == "GET" {
 				resp,err = http.Get(u)
@@ -121,7 +126,7 @@ func DoSiteCheck() {
 
 			UpdateSite(s)
 			
-		})()
+		})(s)
 	}
 }
 

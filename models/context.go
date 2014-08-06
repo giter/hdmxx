@@ -7,10 +7,22 @@ import (
 const DB_NAME = "test"
 
 var _S , _ = mgo.Dial("127.0.0.1")
+var _Init = false
+
+func InitM() {
+
+	_Init = true
+	_S.SetMode(mgo.Monotonic, true)
+}
 
 func M() *mgo.Session {
 
 	if _S != nil {
+
+		if !_Init {
+			InitM()
+		}
+
 		return _S
 	}
 
