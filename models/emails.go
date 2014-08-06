@@ -20,6 +20,10 @@ var TLS_CONFIG  = &tls.Config {
 
 func NewEmail(To string, Subject string , Body string) (err error) {
 
+		if To == "" {
+			return
+		}
+
 		auth := smtp.PlainAuth("",LOGIN_NAME, PASSWORD, HOST)
 
 	  headers := make(map[string]string)

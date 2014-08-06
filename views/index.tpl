@@ -26,26 +26,33 @@
 
 		<div class='container' style='margin-top:1em;'>
 			<div class="row">
-				<table class='table table-bordered'>
+				<table class='table table-bordered table-striped table-hover'>
 
 					<thead>
 						<tr>
 							<th width=120>ID</th>
 							<th>网站</th>
-							<th>网址</th>
 							<th>方法</th>
 							<th>间隔</th>
+							<th>状态</th>
+							<th>下次检查</th>
+							<th>邮件通知</th>
 						</tr>
 					</thead>
 
 					<tbody>
+
 						{{range .Sites}}
-							<tr>
+							<tr class='{{if eq .Status 0}}danger{{end}}'>
 								<td>{{.HexId}}</td>
-								<td>{{.Name}}</td>
-								<td>{{.Url}}</td>
+								<td><a href='{{.Url}}' target='_blank'>{{.Name}}</a></td>
 								<td>{{.Method}}</td>
-								<td>{{.Duration}}</td>
+								<td>{{.Duration}} 秒</td>
+								<td>
+									<span class='text-{{if eq .Status 1}}success{{end}}'>{{.TStatus}}</span>
+								</td>
+								<td>{{.TExpiration}}</td>
+								<td>{{.Email}}</td>
 							</tr>
 						{{end}}
 					</tbody>

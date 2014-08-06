@@ -2,7 +2,7 @@ package models;
 
 
 import (
-
+	
 	"time"
 	"io/ioutil"
 	"net/http"
@@ -11,23 +11,43 @@ import (
 )
 
 
-type Site struct{
+type Site struct {
 
 	Id    b.ObjectId `bson:"_id"`
 
 	Name	string `bson:"Name"`
 	Url		string `bson:"Url"`
+
+	CheckPoint string `bson:"CheckPoint"`
 	Method	string `bson:"Method"`
 
 	Email string `bson:"Email"`
 
 	Duration	int `bson:"Duration"`
 	Expiration int64 `bson:"Expiration"`
+
+	Status    int `bson:"Status"`
+	Disabled  bool `bson:"Disabled"`
 }
 
 func (s Site) HexId() string {
 
     return s.Id.Hex()
+}
+
+func (s Site) TStatus() (ss string) {
+
+	switch(s.Status) {
+		default: ss = "正常"
+		case 0: ss = "不可用"
+	}
+
+	return
+}
+
+func (s Site) TExpiration() string {
+
+	return time.Unix(s.Expiration, 0).Format("2006-01-02 15:04:05")
 }
 
 const COLL_SITE = "site"
@@ -47,11 +67,6 @@ func UpdateSite(s Site){
 	_C().Upsert(b.M{"_id": s.Id},s)
 }
 
-func UpdateSiteExpiration(Id b.ObjectId, Expiration int64) {
-
-	_C().Update(b.M{"_id": Id},b.M{"$set": b.M{"Expiration": Expiration}})
-}
-
 func ListSite() (result []Site) {
 
 	_C().Find(nil).Iter().All(&result)
@@ -64,19 +79,22 @@ func DoSiteCheck() {
 
 		now := time.Now().Unix()
 
-		if s.Duration <= 0 || s.Expiration > now || s.Email == "" {
+		if s.Disabled || s.CheckPoint == "" || s.Duration <= 0 || s.Expiration > now {
 			continue
 		}
 
-		UpdateSiteExpiration(s.Id,(now+int64(s.Duration)))
+
+		s.Expiration = (now+int64(s.Duration))
 
 		go (func () {
 
+			u := s.CheckPoint
 			m := s.Method
-			u := s.Url
 		
 			var resp *http.Response
 			var err error
+			
+			s.Status = 1
 
 			if m == "GET" {
 				resp,err = http.Get(u)
@@ -86,18 +104,23 @@ func DoSiteCheck() {
 
 			if err != nil {
 
-				NewEmail(s.Email, s.Name + "访问异常" , "请注意！")
+				s.Status = 0
 
 			}else{
 
 				defer resp.Body.Close()
-
-				body,err1 := ioutil.ReadAll(resp.Body)
-
-				if err1 != nil || len(body) == 0 {
-					NewEmail(s.Email, s.Name + "访问异常" , "请注意！")
+				if body,err1 := ioutil.ReadAll(resp.Body) ; err1 != nil || len(body) == 0 {
+					s.Status = 0
 				}
 			}
+
+			if s.Status == 0 && s.Email != "" {
+
+				go NewEmail(s.Email, s.Name + "访问异常" , "请注意！")
+			}
+
+			UpdateSite(s)
+			
 		})()
 	}
 }
