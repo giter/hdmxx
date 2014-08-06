@@ -35,7 +35,8 @@
 							<th>方法</th>
 							<th>间隔</th>
 							<th>状态</th>
-							<th>下次检查</th>
+							<th>监控次数</th>
+							<th>计划</th>
 							<th>邮件通知</th>
 						</tr>
 					</thead>
@@ -51,6 +52,7 @@
 								<td>
 									<span class='text-{{if eq .Status 1}}success{{end}}'>{{.TStatus}}</span>
 								</td>
+								<td>{{.Count}}</td>
 								<td>{{.TExpiration}}</td>
 								<td>{{.Email}}</td>
 							</tr>

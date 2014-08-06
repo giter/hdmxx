@@ -29,6 +29,7 @@ type Site struct {
 
 	Status    int `bson:"Status"`
 	Disabled  bool `bson:"Disabled"`
+	Count	int	`bson:"Count"`
 }
 
 func (s Site) HexId() string {
@@ -88,6 +89,7 @@ func DoSiteCheck() {
 
 
 		s.Expiration = (now+int64(s.Duration))
+		s.Count++
 
 		go (func (s Site) {
 
