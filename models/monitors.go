@@ -2,7 +2,6 @@ package models;
 
 
 import (
-	
 	"fmt"
 	"time"
 	"io/ioutil"
@@ -71,7 +70,7 @@ func UpdateSite(s Site){
 
 func ListSite() (result []Site) {
 
-	_C().Find(nil).Iter().All(&result)
+	_C().Find(nil).Sort("_id").Iter().All(&result)
 	return 
 }
 
@@ -90,6 +89,7 @@ func DoSiteCheck() {
 
 		s.Expiration = (now+int64(s.Duration))
 		s.Count++
+		UpdateSite(s)
 
 		go (func (s Site) {
 
@@ -123,7 +123,7 @@ func DoSiteCheck() {
 
 			if s.Status == 0 && s.Email != "" {
 
-				go NewEmail(s.Email, s.Name + "访问异常" , "请注意！")
+				go NewEmail(s.Email, "网站访问异常" , "名称："+s.Name+"\r\n网址："+s.Url+"\r\n\r\n"+"请注意处理！")
 			}
 
 			UpdateSite(s)
