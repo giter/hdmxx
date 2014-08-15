@@ -1,21 +1,30 @@
 package models;
 
 import (
+		"strings"
     "fmt"
 	  "net/smtp"
+		"net/mail"
     "crypto/tls"
+		"encoding/base64"
 )
 
 const HOST        = "smtp.exmail.qq.com"
 const SERVER_NAME = "smtp.exmail.qq.com:465"
 
-const LOGIN_NAME  = "xxx"
-const PASSWORD    = "yyy"
-const FROM        = "zzz"
+const LOGIN_NAME  = "XXX"
+const PASSWORD    = "YYY"
+const FROM        = "ZZZ"
 
 var TLS_CONFIG  = &tls.Config {
 		InsecureSkipVerify: true,
 		ServerName: HOST,
+}
+
+func encodeRFC2047(String string) string {
+
+	addr := mail.Address{String, ""}
+	return strings.Trim(addr.String(), " <>")
 }
 
 func NewEmail(To string, Subject string , Body string) (err error) {
@@ -31,7 +40,10 @@ func NewEmail(To string, Subject string , Body string) (err error) {
     headers["From"] = FROM
     headers["To"] = To
 
-    headers["Subject"] = Subject
+		headers["Content-Type"] = "text/plain; charset=\"utf-8\""
+		headers["Content-Transfer-Encoding"] = "base64"
+
+    headers["Subject"] = encodeRFC2047(Subject)
 
     message := ""
 
@@ -39,7 +51,7 @@ func NewEmail(To string, Subject string , Body string) (err error) {
         message += fmt.Sprintf("%s: %s\r\n", k, v)
     }
 
-    message += "\r\n" + Body
+    message += "\r\n" + base64.StdEncoding.EncodeToString([]byte(Body))
 
 		conn, err := tls.Dial("tcp", SERVER_NAME, TLS_CONFIG)
 

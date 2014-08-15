@@ -24,7 +24,7 @@
   	<body>
 
 		<header>
-			<div class='navbar navbar-inverse navbar-static-top'>
+			<div class='navbar navbar-default navbar-static-top'>
 				<div class='container-fluid'> 
 					<div style='padding:0 12px;'>
 						<div class='navbar-header'>
@@ -35,7 +35,12 @@
 							<li ><a href='#'>监控中心</a></li>
 						</ul>
 						<ul class='nav navbar-nav navbar-right'>
-							<li><a href='#'>登录</a></li>
+							{{if .GUser.Account}}
+								<li><a href='javascript:void(0)'>{{.GUser.Account}}</a></li>
+								<li><a href='/logout.go'>退出</a></li>
+							{{else}}
+								<li><a href='/login.go'>登录{{.GUser.Account}}</a></li>
+							{{end}}
 						</ul>
 					</div>
 				</div>

@@ -53,13 +53,6 @@
 		</div>
 
 		<div class='form-group'>
-			<label class='col-sm-2 control-label'>邮件通知</label> 
-			<div class='col-sm-10'>
-				<input class='form-control' type='text' placeholder='account@example.com' name='Email' value="{{.Site.Email}}" />
-			</div>
-		</div>
-
-		<div class='form-group'>
 			<label class='col-sm-2 control-label'>禁用</label> 
 			<div class='col-sm-10'>
 				<input type='checkbox' name='Disabled' value='true' style='margin-top:11px;' {{if eq .Site.Disabled true}}checked='checked'{{end}} />

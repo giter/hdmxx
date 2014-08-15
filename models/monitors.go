@@ -2,10 +2,8 @@ package models;
 
 
 import (
-	"fmt"
 	"time"
-	"io/ioutil"
-	"net/http"
+	"github.com/astaxie/beego"
 	"gopkg.in/mgo.v2"
 	b "gopkg.in/mgo.v2/bson"
 )
@@ -21,14 +19,15 @@ type Site struct {
 	CheckPoint string `bson:"CheckPoint"`
 	Method	string `bson:"Method"`
 
-	Email string `bson:"Email"`
-
 	Duration	int `bson:"Duration"`
 	Expiration int64 `bson:"Expiration"`
+	Run	int64	`bson:"Run"`
 
 	Status    int `bson:"Status"`
 	Disabled  bool `bson:"Disabled"`
 	Count	int	`bson:"Count"`
+
+	Users []User `bson:"Users"`
 }
 
 func (s Site) HexId() string {
@@ -51,32 +50,53 @@ func (s Site) TExpiration() string {
 	return time.Unix(s.Expiration, 0).Format("2006-01-02 15:04:05")
 }
 
+func (s Site) TRun() string {
+	return time.Unix(s.Run, 0).Format("2006-01-02 15:04:05")
+}
+
 const COLL_SITE = "site"
 
-func _C() *mgo.Collection {
+func SiteColl() *mgo.Collection {
 
 	return DB().C(COLL_SITE)
 }
 
-func NewSite(s Site){
-	
-	_C().Insert(s)
+func NewSite(s Site) error{
+
+	return SiteColl().Insert(s)
 }
 
-func UpdateSite(s Site){
+func UpdateSite(s Site) (err error){
 
-	_C().Upsert(b.M{"_id": s.Id},s)
+	_,err = SiteColl().Upsert(b.M{"_id": s.Id},s)
+	return
 }
 
-func ListSite() (result []Site) {
+func FindSite(query interface{}) *mgo.Query {
 
-	_C().Find(nil).Sort("_id").Iter().All(&result)
-	return 
+	return SiteColl().Find(query);
+}
+
+func ListSite() (result []Site,err error) {
+
+	err = SiteColl().Find(nil).Sort("_id").Iter().All(&result)
+	return
+}
+
+func GetSite(Id string)(s *Site, err error){
+
+	err = SiteColl().Find(b.M{"_id":b.ObjectIdHex(Id)}).One(&s)
+	return
 }
 
 func DoSiteCheck() {
 
-	for _, s := range ListSite() {
+	sites, err := ListSite();
+	if err != nil {
+		return
+	}
+
+	for _, s := range sites {
 
 		now := time.Now().Unix()
 
@@ -88,6 +108,7 @@ func DoSiteCheck() {
 
 
 		s.Expiration = (now+int64(s.Duration))
+		s.Run = now
 		s.Count++
 		UpdateSite(s)
 
@@ -95,39 +116,28 @@ func DoSiteCheck() {
 
 			u := s.CheckPoint
 			m := s.Method
-		
-			var resp *http.Response
-			var err error
-			
-			s.Status = 1
 
-			fmt.Println("Processing " + u + "...")
+			beego.Info("Processing " + u + " ......")
 
-			if m == "GET" {
-				resp,err = http.Get(u)
-			}else if m == "POST" {
-				resp,err = http.Post(u,"application/form-data-url", nil)
-			}
 
-			if err != nil {
+			s.Status, _ = CheckHttp(m,u);
 
-				s.Status = 0
+			Title := "网站访问异常"
+			Content := "名称："+s.Name+"\r\n网址："+s.Url+"\r\n\r\n"+"请注意处理！"
 
-			}else{
+			if s.Users != nil && len(s.Users) > 0 {
 
-				defer resp.Body.Close()
-				if body,err1 := ioutil.ReadAll(resp.Body) ; err1 != nil || len(body) == 0 {
-					s.Status = 0
+				for _, u := range(s.Users) {
+
+					if u.Email != "" {
+						go NewEmail(u.Email, Title, Content)
+					}
 				}
-			}
 
-			if s.Status == 0 && s.Email != "" {
-
-				go NewEmail(s.Email, "网站访问异常" , "名称："+s.Name+"\r\n网址："+s.Url+"\r\n\r\n"+"请注意处理！")
 			}
 
 			UpdateSite(s)
-			
+
 		})(s)
 	}
 }
