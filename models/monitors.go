@@ -16,8 +16,17 @@ type Site struct {
 	Name	string `bson:"Name"`
 	Url		string `bson:"Url"`
 
+	Type string `bson:"Type"`
+
+	//HTTP
 	CheckPoint string `bson:"CheckPoint"`
 	Method	string `bson:"Method"`
+
+	//TCP/UDP
+	Address string `bson:"Address"`
+	Port int `bson:"Port"`
+	Input string `bson:"Input"`
+	Result string `bson:"Result"`
 
 	Duration	int `bson:"Duration"`
 	Expiration int64 `bson:"Expiration"`
@@ -101,7 +110,7 @@ func DoSiteCheck() {
 		now := time.Now().Unix()
 
 
-		if s.Disabled || s.CheckPoint == "" || s.Duration <= 0 || s.Expiration > now {
+		if s.Disabled || s.Duration <= 0 || s.Expiration > now {
 
 			continue
 		}
@@ -114,18 +123,24 @@ func DoSiteCheck() {
 
 		go (func (s Site) {
 
-			u := s.CheckPoint
-			m := s.Method
-
-			beego.Info("Processing " + u + " ......")
+			beego.Info("Processing " + s.Url + " ......")
 
 
-			s.Status, _ = CheckHttp(m,u);
+			switch(s.Type){
+			case "HTTP":
+				s.Status, _ = CheckHttp(s.Method,s.CheckPoint);
+			case "TCP":
+				s.Status, _ = CheckNet("tcp",s.Address,s.Port,s.Input,s.Result)
+			}
+
+			UpdateSite(s)
 
 			Title := "网站访问异常"
 			Content := "名称："+s.Name+"\r\n网址："+s.Url+"\r\n\r\n"+"请注意处理！"
 
-			if s.Users != nil && len(s.Users) > 0 {
+			beego.Info(s.Status)
+
+			if s.Status == 0 && s.Users != nil && len(s.Users) > 0 {
 
 				for _, u := range(s.Users) {
 
@@ -135,8 +150,6 @@ func DoSiteCheck() {
 				}
 
 			}
-
-			UpdateSite(s)
 
 		})(s)
 	}

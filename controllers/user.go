@@ -1,7 +1,5 @@
 package controllers
 
-
-
 import (
 
 	"github.com/astaxie/beego"
@@ -39,10 +37,10 @@ func (this *UserLogin) Post() {
 	if u.Account != "" {
 
 		this.SetSession("user", u)
-		this.Redirect("/",302)
+		this.Redirect(ROOT,302)
 	}
 
-	this.Redirect("/login.go",302)
+	this.Redirect(LOGIN,302)
 }
 
 type UserLogout struct {
@@ -52,5 +50,5 @@ type UserLogout struct {
 func (this *UserLogout) Get() {
 
 	this.DelSession("user")
-	this.Redirect("/",302)
+	this.Redirect(ROOT,302)
 }

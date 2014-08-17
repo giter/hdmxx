@@ -3,6 +3,7 @@ package models;
 import (
 
 	"io/ioutil"
+	"net"
 	"net/http"
 )
 
@@ -26,10 +27,33 @@ func CheckHttp(Method string, Url string)(Status int,err error) {
 
 				defer resp.Body.Close()
 
-				if body,err := ioutil.ReadAll(resp.Body) ; err != nil || len(body) == 0 {
+				var body []byte
+
+				if body,err = ioutil.ReadAll(resp.Body) ; err != nil || len(body) == 0 {
 					Status = 0
 				}
 			}
 
 			return
+}
+
+func CheckNet(Protocol string, Address string, Port int, Input string, Result string)(Status int,err error){
+
+	var conn net.Conn
+	if conn, err = net.Dial(Protocol, Address + ":" + string(Port)); err != nil {
+
+		Status = 0
+		return
+	}
+
+	defer conn.Close()
+
+	if len(Input) > 0 {
+		panic("Not Implemented!")
+	}else{
+		Status = 1
+	}
+
+
+	return
 }

@@ -16,7 +16,7 @@ func (this *MainController) Get() {
 	if u, ok := this.GetSession("user").(models.User); ok {
 		this.Data["GUser"] = u
 	}else{
-		this.Redirect("/login.go",302)
+		this.Redirect(LOGIN,302)
 	}
 
 

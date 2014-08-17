@@ -5,14 +5,14 @@
 
 	<div class='panel-body'>
 
-		<form method='post' class='form-horizontal' style='padding: 12px 24px'>
+		<form id='form-user-login' method='post' class='form-horizontal' style='padding: 12px 24px'>
 
 			<div class='form-group'>
-					<input name='Account' type='text' class='form-control' placeholder='用户名...' />
+					<input name='Account' type='text' class='required form-control' data-msg-required="请输入用户名.." placeholder='用户名..' />
 			</div>
 
 			<div class='form-group'>
-					<input name='Password' type='password' class='form-control' placeholder='密码...'/>
+					<input name='Password' type='password' class='required form-control' data-msg-required="请输入密码.." placeholder='密码..'/>
 			</div>
 
 			<div class='form-group'>

@@ -13,8 +13,20 @@ type User struct {
 	Account string `bson:"Account"`
 	Password string `bson:"Password"`
 
+	Name	string	`bson:"Name"`
 	Email string	`bson:"Email"`
 	Mobile string `bson:"Mobile"`
+}
+
+func (u User) UserName()(n string) {
+
+	n = u.Account
+
+	if len(u.Name) > 0 {
+		n = u.Name
+	}
+
+	return
 }
 
 const COLL_USER = "user"

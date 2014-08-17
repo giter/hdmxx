@@ -49,7 +49,7 @@ func (this *NewSiteController) Post(){
 	}
 
 	var ss *models.Site
-	
+
 	if s.Id != "" {
 		ss,_ = models.GetSite(s.Id)
 	}else{
@@ -59,6 +59,7 @@ func (this *NewSiteController) Post(){
 
 	ss.Name = (s.Name)
 	ss.Url = (s.Url)
+	ss.Type = models.TYPE_HTTP
 	ss.CheckPoint = (s.CheckPoint)
 	ss.Method = (s.Method)
 	ss.Duration = (s.Duration)
@@ -70,6 +71,6 @@ func (this *NewSiteController) Post(){
 		models.NewSite(*ss)
 	}
 
-	this.Redirect("/", 302)
+	this.Redirect(ROOT, 302)
 
 }

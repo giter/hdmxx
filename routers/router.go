@@ -1,14 +1,14 @@
 package routers
 
 import (
-	"github.com/giter/hdmxx/controllers"
+	c "github.com/giter/hdmxx/controllers"
 	"github.com/astaxie/beego"
 )
 
 func init() {
 
-  beego.Router("/", &controllers.MainController{})
-  beego.Router("/site.go", &controllers.NewSiteController{})
-	beego.Router("/login.go",&controllers.UserLogin{})
-	beego.Router("/logout.go",&controllers.UserLogin{})
+  beego.Router(c.ROOT, &c.MainController{})
+  beego.Router(c.SITE, &c.NewSiteController{})
+	beego.Router(c.LOGIN,&c.UserLogin{})
+	beego.Router(c.LOGOUT,&c.UserLogin{})
 }

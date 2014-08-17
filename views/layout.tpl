@@ -10,7 +10,9 @@
 		<link rel="stylesheet" href="/static/css/global.css">
 
 		<script src="/static/js/jquery.min.js"></script>
+		<script src="/static/js/jquery.validate.min.js"></script>
 		<script src="/static/js/bootstrap.min.js"></script>
+		<script src="/static/js/global.js"></script>
 		
 		<!--[if lt IE 9]>
 			<script src="/static/js/html5shiv.min.js"></script>
@@ -36,7 +38,7 @@
 						</ul>
 						<ul class='nav navbar-nav navbar-right'>
 							{{if .GUser.Account}}
-								<li><a href='javascript:void(0)'>{{.GUser.Account}}</a></li>
+								<li><a href='javascript:void(0)'>{{.GUser.UserName}}</a></li>
 								<li><a href='/logout.go'>退出</a></li>
 							{{else}}
 								<li><a href='/login.go'>登录{{.GUser.Account}}</a></li>
@@ -47,11 +49,9 @@
 			</div>
 		</header>
 
-		<div class='container'>
-			<div class='row' style='margin-top:12px;'>
+		<article class='container'>
 				{{.LayoutContent}}
-			</div>
-		</div>
+		</article>
 
 		<footer> 
 			<div class='container-fluid'> 

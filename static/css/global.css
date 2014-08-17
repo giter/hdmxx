@@ -1,1 +1,4 @@
 footer {bottom:0px;right:0;position:fixed;}
+
+label.error{color:#ff0000 !important;margin-top:8px;}
+input.error{border-color:#ff0000 !important;}

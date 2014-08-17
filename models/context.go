@@ -4,6 +4,10 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+const TYPE_HTTP = "HTTP"
+const TYPE_TCP  = "TCP"
+const TYPE_UDP  = "UDP"
+
 const DB_NAME = "test"
 
 var _S , _ = mgo.Dial("127.0.0.1")
