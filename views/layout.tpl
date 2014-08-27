@@ -14,10 +14,10 @@
 		<script src="/static/js/bootstrap.min.js"></script>
 		<script src="/static/js/global.js"></script>
 		
-		<!--[if lt IE 9]>
+		{{ str2html "<!--[if lt IE 9]>"}}
 			<script src="/static/js/html5shiv.min.js"></script>
 			<script src="/static/js/respond.min.js"></script>
-		<![endif]-->
+		{{ str2html "<![endif]-->"}}
 
 		{{.Heads}}
 
@@ -56,7 +56,8 @@
 		<footer> 
 			<div class='container-fluid'> 
 				<div class='row text-right' style='padding: 0 12px;'>
-					<a target='_blank' href='https://github.com/giter/hdmxx'>@giter</a>
+					<small>COPY RIGHT 2014-2099 &copy; giter&lt;nubix at qq dot com&gt;</small>
+					<!--<a target='_blank' href='https://github.com/giter/hdmxx'>@giter</a>-->
 				</div>
 			</div>
 		</footer>

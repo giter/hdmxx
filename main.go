@@ -31,17 +31,18 @@ func main() {
 		uri := ctx.Input.Uri()
 		beego.Warn(uri)
 
-		if strings.HasPrefix(uri, "/login.go") || strings.HasPrefix(uri, "/favicon.ico") {
+		if strings.HasPrefix(uri, "/login.go") || strings.HasPrefix(uri, "/static/") || strings.HasPrefix(uri, "/favicon.ico") {
 			return
 		}
 
-		u, ok := ctx.Input.Session("user").(models.User)
+		u, ok := ctx.Input.Session("user").(*models.User)
 
 		if !ok || u.Account == "" {
 			ctx.Redirect(302, "/login.go")
+			return
 		}
 
-		ctx.Input.SetData("GUser", ctx.Input.Session("user").(models.User))
+		ctx.Input.SetData("GUser", ctx.Input.Session("user").(*models.User))
 	}
 
 	beego.InsertFilter("*",beego.BeforeRouter,AccessFilter)

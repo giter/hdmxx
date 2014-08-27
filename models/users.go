@@ -2,6 +2,7 @@ package models;
 
 
 import (
+
 	"gopkg.in/mgo.v2"
 	b "gopkg.in/mgo.v2/bson"
 )
@@ -16,6 +17,8 @@ type User struct {
 	Name	string	`bson:"Name"`
 	Email string	`bson:"Email"`
 	Mobile string `bson:"Mobile"`
+
+	Admin bool `bson:"Admin"`
 }
 
 func (u User) UserName()(n string) {
@@ -36,6 +39,7 @@ func UserColl() *mgo.Collection {
 }
 
 func NewUser(u User) (err error) {
+
 		err = UserColl().Insert(&u)
 		return
 }

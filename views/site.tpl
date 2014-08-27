@@ -1,9 +1,9 @@
 <div class='panel panel-primary' style='width:600px;margin:0 auto;'>
 
-<div class='panel-heading'><b>{{if eq .Site.HexId ""}}创建{{else}}编辑{{end}}监控</b></div>
+<div class='panel-heading'><b>{{if eq .Site.HexId ""}}创建 - 监控项目{{else}}编辑 - {{.Site.Name}}{{end}}</b></div>
 <div class='panel-body'>
 
-	<form action='site.go' method='POST' class='form-horizontal'>
+	<form id='form-site' action='site.go' method='POST' class='form-horizontal'>
 
 		<input type='hidden' name='Id' value='{{.Site.HexId}}' />
 
@@ -22,13 +22,24 @@
 		</div>
 
 		<div class='form-group'>
+			<label class='col-sm-2 control-label'>类型</label> 
+			<div class='col-sm-10'>
+				<select name='Type' class='form-control required'>
+					<option value='HTTP' {{if eq .Site.Type "HTTP"}}selected="selected"{{end}}>HTTP</option>
+					<option value='TCP'  {{if eq .Site.Type "TCP"}}selected="selected"{{end}}>TCP</option>
+					<option value='UDP'  {{if eq .Site.Type "UDP"}}selected="selected"{{end}}>UDP</option>
+				</select>
+			</div>
+		</div>
+
+		<div class='form-group group-http group'>
 			<label class='col-sm-2 control-label'>CheckPoint</label> 
 			<div class='col-sm-10'>
 				<input class='form-control required' type='text' placeholder='http://example.com/action' name='CheckPoint' value="{{.Site.CheckPoint}}" />
 			</div>
 		</div>
 
-		<div class='form-group'>
+		<div class='form-group group-http group'>
 			<label class='col-sm-2 control-label'>Method</label> 
 			<div class='col-sm-10'>
 				<select name='Method' class='form-control required'>
@@ -37,6 +48,68 @@
 				</select>
 			</div>
 		</div>
+
+		<div class='form-group group-tcp group-udp group'>
+			<label class='col-sm-2 control-label'>Address</label> 
+			<div class='col-sm-10'>
+
+				<input class='form-control required' type='text' placeholder='8.8.8.8' name='Address' value="{{.Site.Address}}" />
+			</div>
+		</div>
+
+		<div class='form-group group-tcp group-udp group'>
+			<label class='col-sm-2 control-label'>Port</label> 
+			<div class='col-sm-10'>
+
+				<input class='form-control required' type='text' placeholder='8080' name='Port' value="{{ if gt .Site.Port 0 }}{{.Site.Port}}{{end}}" />
+			</div>
+		</div>
+
+		<div class='form-group group-http group-tcp group-udp group'>
+			<label class='col-sm-2 control-label'>连接超时</label> 
+			<div class='col-sm-10'>
+
+				<div class='input-group'>
+					<input class='form-control required number' type='text' placeholder='5000' name='CTimeout' value="{{ if gt .Site.CTimeout 0 }}{{.Site.CTimeout}}{{else}}5000{{end}}" />
+					<div class='input-group-addon'>ms</div>
+				</div>
+			</div>
+		</div>
+
+		<div class='form-group group-http group-tcp group-udp group'>
+			<label class='col-sm-2 control-label'>读取超时</label> 
+			<div class='col-sm-10'>
+
+				<div class='input-group'>
+					<input class='form-control required number' type='text' placeholder='60000' name='RTimeout' value="{{ if gt .Site.RTimeout 0 }}{{.Site.RTimeout}}{{else}}60000{{end}}" />
+					<div class='input-group-addon'>ms</div>
+				</div>
+			</div>
+		</div>
+
+		<div class='form-group group-tcp group-udp group'>
+			<label class='col-sm-2 control-label'>输入字节</label> 
+			<div class='col-sm-10'>
+
+				<div class='input-group'>
+					<input class='form-control' type='text' placeholder='Base64 Encoding' name='Input' value="{{.Site.Input}}" />
+					<div class='input-group-addon'>B64</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div class='form-group group-tcp group-udp group'>
+			<label class='col-sm-2 control-label'>输出字节</label> 
+			<div class='col-sm-10'>
+
+				<div class='input-group'>
+					<input class='form-control' type='text' placeholder='Base64 Encoding' name='Result' value="{{.Site.Result}}" />
+					<div class='input-group-addon'>B64</div>
+				</div>
+			</div>
+		</div>
+
 
 		<div class='form-group'>
 			<label class='col-sm-2 control-label'>监控间隔</label> 
@@ -69,3 +142,13 @@
 	</form>
 </div>
 </div>
+
+<script>
+
+	$(function(){
+
+		$("#form-site").find("[name=Type]").change(function(){
+			$("#form-site").find(".group").hide().end().find(".group-"+$(this).val().toLowerCase()).show()
+		}).trigger('change');
+	});
+</script>

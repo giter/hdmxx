@@ -28,6 +28,10 @@ type Site struct {
 	Input string `bson:"Input"`
 	Result string `bson:"Result"`
 
+	//Common
+	CTimeout int `bson:"CTimeout"`
+	RTimeout int `bson:"RTimeout"`
+
 	Duration	int `bson:"Duration"`
 	Expiration int64 `bson:"Expiration"`
 	Run	int64	`bson:"Run"`
@@ -35,6 +39,10 @@ type Site struct {
 	Status    int `bson:"Status"`
 	Disabled  bool `bson:"Disabled"`
 	Count	int	`bson:"Count"`
+
+	Delay int64 `bson:"Delay"`
+
+	Log string `bson:"Log"`
 
 	Users []User `bson:"Users"`
 }
@@ -110,7 +118,7 @@ func DoSiteCheck() {
 		now := time.Now().Unix()
 
 
-		if s.Disabled || s.Duration <= 0 || s.Expiration > now {
+		if s.Type == "" || s.Disabled || s.Duration <= 0 || s.Expiration > now {
 
 			continue
 		}
@@ -125,22 +133,60 @@ func DoSiteCheck() {
 
 			beego.Info("Processing " + s.Url + " ......")
 
+			now := time.Now().UnixNano()
+
+			var err error
+			var Status int
+
+			CTimeout := s.CTimeout
+			if CTimeout <= 0 {
+				CTimeout = 5000
+			}
+
+			RTimeout := s.RTimeout
+			if RTimeout <= 0 {
+				RTimeout = 600000
+			}
+
 
 			switch(s.Type){
 			case "HTTP":
-				s.Status, _ = CheckHttp(s.Method,s.CheckPoint);
+				Status, err = CheckHttp(s);
 			case "TCP":
-				s.Status, _ = CheckNet("tcp",s.Address,s.Port,s.Input,s.Result)
+				Status, err = CheckNet("tcp", s)
+			case "UDP":
+				Status, err = CheckNet("udp", s)
 			}
-
-			UpdateSite(s)
-
-			Title := "网站访问异常"
-			Content := "名称："+s.Name+"\r\n网址："+s.Url+"\r\n\r\n"+"请注意处理！"
 
 			beego.Info(s.Status)
 
-			if s.Status == 0 && s.Users != nil && len(s.Users) > 0 {
+			if err != nil	{
+				s.Log = err.Error()
+			}
+
+			s.Delay = time.Now().UnixNano() - now
+			s.Delay = s.Delay / 1000000
+
+			Notify := true
+			var Title string
+			var Content string
+
+			if s.Status == 0 && Status == 1 {
+
+				Title = "恢复正常通知"
+				Content = "名称："+s.Name+"\r\n网址："+s.Url+"\r\n\r\n"+"请注意处理！"
+			}else if Status == 0 {
+
+				Title = "访问异常通知"
+				Content = "名称："+s.Name+"\r\n网址："+s.Url+"\r\n\r\n"+"请注意处理！"
+			}else{
+				Notify= false
+			}
+
+			s.Status = Status
+			UpdateSite(s)
+
+			if Notify && s.Users != nil && len(s.Users) > 0 {
 
 				for _, u := range(s.Users) {
 

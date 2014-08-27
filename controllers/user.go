@@ -2,6 +2,8 @@ package controllers
 
 import (
 
+	"crypto/md5"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/giter/hdmxx/models"
 )
@@ -32,11 +34,13 @@ func (this *UserLogin) Post() {
 		return
 	}
 
+	s.Password = fmt.Sprintf("%x", md5.Sum([]byte(s.Password)))
+
 	u := models.UserLogin(s.Account,s.Password)
 
 	if u.Account != "" {
 
-		this.SetSession("user", u)
+		this.SetSession("user", &u)
 		this.Redirect(ROOT,302)
 	}
 
