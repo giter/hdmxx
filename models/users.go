@@ -1,27 +1,25 @@
-package models;
-
+package models
 
 import (
+	"errors"
 
-	"gopkg.in/mgo.v2"
-	b "gopkg.in/mgo.v2/bson"
+	"github.com/chinahdkj/xorm"
 )
 
 type User struct {
+	Id int64 `bson:"_id" xorm:"pk autoincr"`
 
-	Id string	`bson:"_id"`
-
-	Account string `bson:"Account"`
+	Account  string `bson:"Account index"`
 	Password string `bson:"Password"`
 
-	Name	string	`bson:"Name"`
-	Email string	`bson:"Email"`
+	Name   string `bson:"Name"`
+	Email  string `bson:"Email"`
 	Mobile string `bson:"Mobile"`
 
 	Admin bool `bson:"Admin"`
 }
 
-func (u User) UserName()(n string) {
+func (u User) UserName() (n string) {
 
 	n = u.Account
 
@@ -32,36 +30,48 @@ func (u User) UserName()(n string) {
 	return
 }
 
+type UserService struct {
+}
+
+func NewUserService() *UserService {
+	return &UserService{}
+}
+
 const COLL_USER = "user"
 
-func UserColl() *mgo.Collection {
-	return DB().C(COLL_USER)
+func (this *UserService) Table() *xorm.Session {
+	return DB().Table(new(User))
 }
 
-func NewUser(u User) (err error) {
-
-		err = UserColl().Insert(&u)
-		return
+func (this *UserService) Insert(u User) error {
+	_, err := this.Table().Insert(u)
+	return err
 }
 
-func UpdateUser(u User) (err error) {
-
-		_,err = UserColl().Upsert(b.M{"_id": u.Id},u)
-		return
+func (this *UserService) Update(u User) error {
+	_, err := this.Table().Id(u.Id).Update(u)
+	return err
 }
 
-func ListUser()(r []User,err error) {
-
-	err = UserColl().Find(nil).Sort("_id").Iter().All(&r)
+func (this *UserService) List() (s []User, err error) {
+	err = this.Table().Find(&s)
 	return
 }
 
-func UserLogin(Account string, Password string) (u User) {
+func (this *UserService) Login(Account string, Password string) (u *User, err error) {
 
-	FindUser(b.M{"Account":Account,"Password":Password}).One(&u)
-	return
-}
+	var s []User = []User{}
 
-func FindUser(query interface{}) *mgo.Query {
-	return UserColl().Find(query)
+	err = this.Table().And("account = ?", Account).And("password = ?", Password).Limit(2).Find(&s)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(s) > 1 || len(s) == 0 {
+		return nil, errors.New("登录失败!")
+	}
+
+	u = &s[0]
+	return u, err
 }

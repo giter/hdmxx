@@ -1,46 +1,23 @@
-package models;
+package models
 
-import (
-	"gopkg.in/mgo.v2"
-)
+import "github.com/chinahdkj/xorm"
+import _ "github.com/mattn/go-sqlite3"
 
-const TYPE_HTTP = "HTTP"
-const TYPE_TCP  = "TCP"
-const TYPE_UDP  = "UDP"
+var db *xorm.Engine = nil
 
-const DB_NAME = "test"
+func init() {
 
-var _S , _ = mgo.Dial("127.0.0.1")
-var _Init = false
+	d, err := xorm.NewEngine("sqlite3", "./jxbskj.db")
 
-func InitM() {
-
-	_Init = true
-	_S.SetMode(mgo.Monotonic, true)
-}
-
-func M() *mgo.Session {
-
-	if _S != nil {
-
-		if !_Init {
-			InitM()
-		}
-
-		return _S
+	if err != nil {
+		panic(err)
 	}
 
-	panic("No Connection!")
+	db = d
 
+	db.Sync2(new(User))
 }
 
-var _D = M().DB(DB_NAME)
-
-func DB() *mgo.Database {
-
-	if _D != nil {
-		return _D
-	}
-
-	panic("No Connection!")
+func DB() *xorm.Engine {
+	return db
 }
